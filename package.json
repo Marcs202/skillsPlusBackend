@@ -17,5 +17,8 @@
     "oci-common": "^2.70.1",
     "oci-sdk": "^2.70.1",
     "oracledb": "^6.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
