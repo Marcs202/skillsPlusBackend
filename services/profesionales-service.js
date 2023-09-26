@@ -2,16 +2,17 @@ const oracledb = require('oracledb');
 module.exports = class ProfesionalesService {
     constructor() { }
     static async init() {
-        console.log(`process.env.DB_USER: ${process.env.DB_USER}`);//admin
+        console.log(`process.env.DB_USER:${process.env.DB_USER}`);//admin
         console.log(`process.env.DB_PASSWORD:${process.env.DB_PASSWORD}`);//EstaPassEsLarga123
         console.log(`process.env.CONNECT_STRING:${process.env.CONNECT_STRING}`);//skillsdb_high
-        console.log(`process.env.DIRECCION:${process.env.DIRECCION}`)
+        console.log(`process.env.DIRECCION:${process.env.ORACLE_LIB_DIR}`)
         console.log('Creando pool de conexiones...');
         //'C:\\oracle\\instantclient_21_11' ;
-        const direccion =  process.env.DIRECCION;
+        const direccion = process.env.ORACLE_LIB_DIR;// process.env.DIRECCION;
         const user= process.env.DB_USER;
-        const password = process.env.PASSWORD;
-        const connectString = process.env.CONNECT_STRING;
+        const password = process.env.DB_PASSWORD;
+        const connectString =process.env.CONNECT_STRING; 
+        
         oracledb.initOracleClient({ libDir: direccion });
 
         await oracledb.createPool({
@@ -19,7 +20,6 @@ module.exports = class ProfesionalesService {
             password: password,
             connectString: connectString,
         });
-
         console.log('Pool de conexiones creado.')
         return new ProfesionalesService();
     }
@@ -31,7 +31,7 @@ module.exports = class ProfesionalesService {
             let sql = `SELECT ID, NOMBRE, FOTO_PERFIL FROM (SELECT perfiles_profesionales.*, ROWNUM AS ranking
                     FROM perfiles_profesionales ORDER BY calificacion_promedio DESC)WHERE ranking <= 10 `;
             //let result = await connection.execute(sql,binds,{autoCommit});
-            let autoCommit = false;
+            let autoCommit = true;
             let result = await connection.execute(sql, [], { autoCommit });
             result.rows.map(profesional => {
                 let schemaProfesional = {
