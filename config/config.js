@@ -1,22 +1,8 @@
-/*const oracledb = require('oracledb');
-db = {
-  user: 'admin',
-  password: 'EstaPassEsLarga123',
-  connectString: 'skillsdb_high'
-  
-}
-oracledb.initOracleClient({ libDir: 'C:\\oracle\\instantclient_21_11' });
-let con;
+const direccion ='C:\\oracle\\instantclient_21_11'; //process.env.ORACLE_LIB_DIR;
+const user= 'admin'; //process.env.DB_USER;
+const password = 'EstaPassEsLarga123'; //process.env.DB_PASSWORD;
+const connectString = 'skillsdb_high';//process.env.CONNECT_STRING; 
 
-async function open(sql,binds,autoCommit) {
-  con = await oracledb.getConnection(db);
-  let result = await con.execute(sql,binds,{autoCommit});
-  con.release();
-  return result;
-}
-async function close(sql,binds, autoCommit){
-  con.close();
-}
-exports.Open = open;
-exports.Close = close;
-*/
+module.exports={
+  direccion,user,password,connectString
+};
