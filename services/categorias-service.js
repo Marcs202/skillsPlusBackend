@@ -53,4 +53,7 @@ module.exports = class CategoriasService{
         }
         return categorias;
     }
+    async get10(){
+        
+    }
 }
