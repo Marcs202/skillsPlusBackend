@@ -33,15 +33,15 @@ module.exports = class ProfesionalesService {
 
         try {
             let query = `
-            SELECT p.id, u.id as Id_usuario  ,u.nombre as Nombre_Profesional, u.foto as Fotografia_Profesional,  c.nombre as Categoria, MIN(a.nombre) as Departamento, p.calificacion_prom
+            SELECT p.id, u.id as Id_usuario  ,u.nombre as Nombre_Profesional, u.apellido,u.foto as Fotografia_Profesional,  c.nombre as Categoria, MIN(a.nombre) as Departamento, p.calificacion_prom
             FROM usuarios u
             INNER JOIN profesionales p ON u.id = p.usuarios_id
             INNER JOIN categorias c ON p.categoria_id = c.id
             INNER JOIN departamento_usuario d ON d.usuario_id = u.id
             INNER JOIN departamento a ON d.departamento_id= a.id
-            GROUP BY p.id, u.id, u.nombre, u.foto, c.nombre, p.calificacion_prom
+            where u.estado=1
+            GROUP BY p.id, u.id, u.nombre,u.apellido, u.foto, c.nombre, p.calificacion_prom
             `
-
             connection = await oracledb.getConnection();
             let result = await connection.execute(query, [], { autoCommit: true });
             result.rows.map(profesional => {
@@ -83,7 +83,7 @@ module.exports = class ProfesionalesService {
             INNER JOIN categorias c ON p.categoria_id = c.id
             INNER JOIN departamento_usuario d ON d.usuario_id = u.id
             INNER JOIN departamento a ON d.departamento_id= a.id
-            WHERE p.calificacion_prom IS NOT NULL
+            WHERE p.calificacion_prom IS NOT NULL AND u.estado=1
             GROUP BY p.id, u.id, u.nombre, u.foto, c.nombre, p.calificacion_prom
             ORDER BY p.calificacion_prom DESC
             FETCH FIRST 10 ROWS ONLY`;
@@ -129,7 +129,7 @@ module.exports = class ProfesionalesService {
             INNER JOIN profesionales p ON u.id = p.usuarios_id
             INNER JOIN categorias c ON p.categoria_id = c.id
             INNER JOIN departamento_usuario d ON d.usuario_id = u.id
-            INNER JOIN departamento a ON d.departamento_id= a.id where p.id = :id`;
+            INNER JOIN departamento a ON d.departamento_id= a.id where p.id = :id AND u.estado=1`;
 
             connection = await oracledb.getConnection();
             let result = await connection.execute(query, [profesionalId], { autoCommit: true });
@@ -173,7 +173,7 @@ module.exports = class ProfesionalesService {
             INNER JOIN categorias c ON p.categoria_id = c.id
             INNER JOIN departamento_usuario d ON d.usuario_id = u.id
             INNER JOIN departamento a ON d.departamento_id= a.id
-            where a.nombre = :departamento
+            where a.nombre = :departamento AND u.estado=1
             `
 
             connection = await oracledb.getConnection();
@@ -218,7 +218,7 @@ module.exports = class ProfesionalesService {
             INNER JOIN categorias c ON p.categoria_id = c.id
             INNER JOIN departamento_usuario d ON d.usuario_id = u.id
             INNER JOIN departamento a ON d.departamento_id= a.id
-            where c.nombre = :categoria
+            where c.nombre = :categoria AND u.estado=1
             GROUP BY p.id, u.id, u.nombre, u.apellido, u.foto, c.nombre, p.calificacion_prom
             `
 
@@ -251,11 +251,48 @@ module.exports = class ProfesionalesService {
         }
         return profesionales;
     }
-    /*para el post que tenga que recibir los id de departamentos, el id de usuario ,el id de la categoria a la que pertenecera el usuario
-    Con el insert a la tabla de profesionales, el id del usuario lo sigo teniendo capturado en mi post
-    por lo tanto puedo recorrer la tabla profesionales y hacer match con el id del usuario para obtener el id del profesional
-    con e id del profesional hago la insercion a la tabla intermedia depertamento_usuario que ingresara el id del usuario y el id del profesional
-    */
+    async getByCategoryDepartament(categoria,departamento){
+        let connection;
+        const profesionales = [];
+
+        try {
+            let query = `
+            SELECT p.id, u.id as Id_usuario, u.nombre as Nombre_Profesional, u.apellido,u.foto as Fotografia_Profesional, c.nombre as Categoria, a.nombre as Departamento, p.calificacion_prom
+            FROM usuarios u
+            INNER JOIN profesionales p ON u.id = p.usuarios_id
+            INNER JOIN categorias c ON p.categoria_id = c.id
+            INNER JOIN departamento_usuario d ON d.usuario_id = u.id
+            INNER JOIN departamento a ON d.departamento_id= a.id
+            WHERE a.nombre= :departamento AND c.nombre= :categoria AND u.estado=1`
+
+            connection = await oracledb.getConnection();
+            let result = await connection.execute(query, { categoria: categoria,departamento:departamento }, { autoCommit: true });
+            result.rows.map(profesional => {
+                let schemaProfesional = {
+                    "ID_Profesional": profesional[0],
+                    "ID_Usuario": profesional[1],
+                    "Nombre": profesional[2],
+                    "Apellido": profesional[3],
+                    "Fotografia": profesional[4],
+                    "Categoria": profesional[5],
+                    "Departamento": profesional[6],
+                    "Calificacion": profesional[7]
+                }
+                profesionales.push(schemaProfesional);
+            });
+        } catch (error) {
+            console.error(error);
+        }
+        finally {
+            try {
+                await connection.close();
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
+        return profesionales;
+    }
     async postProfesional(profesional) {
         //profesional es el json que se recibe del metodo post 
         let usuarioID = profesional.idUsuario;//obtiene el id del usuario capturado por json, la clave es idUsuario
@@ -264,24 +301,15 @@ module.exports = class ProfesionalesService {
         console.log(usuarioID);
         console.log(categoriaID);
         console.log(departamentos);
-        let departametosIDS= departamentos.join(',');
+        let departametosIDS = departamentos.join(',');
         let connection;
         try {
-
-            let query = `
-            BEGIN ingresar_profesional_procedure(:p_user_id, :p_category_id,SYS.ODCINUMBERLIST(${departametosIDS})); END;
-            `;
+            let query = `BEGIN ingresar_profesional_procedure(:p_user_id, :p_category_id,SYS.ODCINUMBERLIST(${departametosIDS})); END;`;
             // Obtén la conexión a la base de datos
             connection = await oracledb.getConnection();
             // Ejecuta el procedimiento almacenado
-            const result = await connection.execute(query, 
-                {
-                    p_user_id:usuarioID,
-                    p_category_id:categoriaID
-                    //p_department_ids: departamento 
+            const result = await connection.execute(query, { p_user_id: usuarioID, p_category_id: categoriaID });
 
-                });
-            
         } catch (err) {
             console.error(err);
         } finally {
@@ -293,7 +321,28 @@ module.exports = class ProfesionalesService {
                 }
             }
         }
+    }
+    async postReportProfesional(profesional) {
+        let connection;
+        try {
+            let profionalId = profesional.idProfesional;
+            let query = `BEGIN incrementar_reporte(:id); END;`;
+            connection = await oracledb.getConnection();
+            const result = await connection.execute(query, [profionalId]);
+            console.log("Se ejecuto result", result);
+            
+        } catch (error) {
+            console.error('Error al subir el objeto:', error);
+            
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
 
     }
-
 }

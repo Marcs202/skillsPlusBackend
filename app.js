@@ -9,7 +9,9 @@ const homeRoutes = require('./routes/index')
 const profesionalesRoutes = require('./routes/profesionales');
 const ProfesionalesService = require('./services/profesionales-service');
 const categoriasRoutes = require('./routes/categorias');
-const CategoriasService = require('./services/categorias-service')
+const CategoriasService = require('./services/categorias-service');
+const serviciosRoutes = require('./routes/servicios');
+const ServiciosService= require('./services/servicios-service');
 const app = express();
 //app.set("port",3000);
 app.set('views', path.join(__dirname, 'views'));
@@ -29,6 +31,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', homeRoutes);
 app.use('/profesionales',profesionalesRoutes);
 app.use('/categorias',categoriasRoutes);
+app.use('/servicios',serviciosRoutes);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
@@ -60,5 +63,12 @@ CategoriasService.init().then((categoriasService)=>{
 });
 process.on('exit', () => {
   app.get('categoriasService').closePool();
+});
+
+ServiciosService.init().then((serviciosService)=>{
+  app.set('serviciosService',serviciosService);
+});
+process.on('exit', () => {
+  app.get('serviciosService').closePool();
 });
 module.exports = app;

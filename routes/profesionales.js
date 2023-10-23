@@ -37,8 +37,20 @@ router.get('/proByCategory', asyncHandler(async (req, res) => {
     res.sendStatus(404);
   }
 }));
+router.get('/proByCategoryDepartament', asyncHandler(async (req, res) => {
+  const { categoria, departamento } = req.query;
+  const response = await res.app.get(PROFESIONALES_SERVICE).getByCategoryDepartament(categoria, departamento);
+  if (response) {
+    res.send(response);
+  } else {
+    res.sendStatus(404);
+  }
+}));
 router.post('/', asyncHandler(async (req, res) => {
   res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postProfesional(req.body));
+}));
+router.post('/report', asyncHandler(async (req, res) => {
+  res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postReportProfesional(req.body));
 }));
 
 module.exports = router;
