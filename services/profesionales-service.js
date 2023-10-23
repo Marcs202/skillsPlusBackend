@@ -264,24 +264,20 @@ module.exports = class ProfesionalesService {
         console.log(usuarioID);
         console.log(categoriaID);
         console.log(departamentos);
-        let departametosIDS= departamentos.join(',');
+        let departametosIDS = departamentos.join(',');
         let connection;
         try {
 
-            let query = `
-            BEGIN ingresar_profesional_procedure(:p_user_id, :p_category_id,SYS.ODCINUMBERLIST(${departametosIDS})); END;
-            `;
+            let query = `BEGIN ingresar_profesional_procedure(:p_user_id, :p_category_id,SYS.ODCINUMBERLIST(${departametosIDS})); END;`;
             // Obtén la conexión a la base de datos
             connection = await oracledb.getConnection();
             // Ejecuta el procedimiento almacenado
-            const result = await connection.execute(query, 
+            const result = await connection.execute(query,
                 {
-                    p_user_id:usuarioID,
-                    p_category_id:categoriaID
-                    //p_department_ids: departamento 
-
+                    p_user_id: usuarioID,
+                    p_category_id: categoriaID
                 });
-            
+
         } catch (err) {
             console.error(err);
         } finally {

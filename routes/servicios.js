@@ -4,6 +4,8 @@ const asyncHandler = require('express-async-handler');
 const SERVICIOS_SERVICE = 'serviciosService';
 
 //obtener todos los servicios 
-router.get('/', asyncHandler(async (req, res) => {
-    res.send(await res.app.get(SERVICIOS_SERVICE).getAll());
-  }));
+router.post('/', asyncHandler(async (req, res) => {
+  res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req.body));
+}));
+
+module.exports = router;
