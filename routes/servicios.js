@@ -34,4 +34,10 @@ router.get('/', asyncHandler(async (req, res) => {
         res.sendStatus(404);
     }
 }));
+router.put('/inactivar', asyncHandler(async (req, res) => {
+    res.status(201).send(await res.app.get(SERVICIOS_SERVICE).inactivarServicio(req.body));
+}));
+router.put('/editar', asyncHandler(async (req, res) => {
+    res.status(201).send(await res.app.get(SERVICIOS_SERVICE).editarServicio(req.body));
+}));
 module.exports = router;

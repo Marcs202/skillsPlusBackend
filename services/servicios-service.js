@@ -87,7 +87,7 @@ module.exports = class ServiciosService {
         try {
             let query = `
             SELECT s.id,profesional_id , s.titulo, s.foto, s.descripcion from servicios s
-            where s.profesional_id = :id`;
+            where s.profesional_id = :id and estado = 1`;
 
             connection = await oracledb.getConnection();
             let result = await connection.execute(query, [profesionalId], { autoCommit: true });
@@ -116,5 +116,51 @@ module.exports = class ServiciosService {
             }
         }
         return servicios;
+    }
+    async inactivarServicio(servicio){
+        let servicioID = servicio.idServicio;//obtiene el id del servicio capturado por json, la clave es idUsuario
+        let connection;
+        try {
+            let query = `UPDATE servicios SET estado = 2 WHERE id= :idServicio`;
+            // Obtén la conexión a la base de datos
+            connection = await oracledb.getConnection();
+            // Ejecuta el procedimiento almacenado
+            const result = await connection.execute(query, { idServicio: servicioID},{autoCommit:true});
+            console.log(result)
+        } catch (err) {
+            console.error(err);
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
+    async editarServicio(servicio){
+        let servicioID = servicio.idServicio;//obtiene el id del servicio capturado por json, la clave es idUsuario
+        let titulo = servicio.titulo;
+        let descripcion = servicio.descripcion;
+        let connection;
+        try {
+            let query = `UPDATE servicios SET titulo = :titulo, descripcion= :descripcion WHERE id= :idServicio`;
+            // Obtén la conexión a la base de datos
+            connection = await oracledb.getConnection();
+            // Ejecuta el procedimiento almacenado
+            const result = await connection.execute(query, {titulo:titulo,descripcion:descripcion,idServicio: servicioID,},{autoCommit:true});
+            
+        } catch (err) {
+            console.error(err);
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
     }
 }
