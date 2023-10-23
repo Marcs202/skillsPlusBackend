@@ -19,7 +19,7 @@ app.set('view engine', 'ejs');
 
 app.use(cors());
 app.use(morgan('dev'));
-app.use(express.json());
+///app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(bodyParser.json());
@@ -33,6 +33,9 @@ app.use('/categorias',categoriasRoutes);
 app.use((req, res, next) => {
   next(createError(404));
 });
+
+
+
 
 // error handler
 app.use((err, req, res) => {
@@ -51,6 +54,7 @@ ProfesionalesService.init().then((profesionalesService)=>{
 process.on('exit', () => {
   app.get('profesionalesService').closePool();
 });
+
 CategoriasService.init().then((categoriasService)=>{
   app.set('categoriasService',categoriasService);
 });

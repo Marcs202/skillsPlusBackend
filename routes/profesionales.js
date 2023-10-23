@@ -37,4 +37,8 @@ router.get('/proByCategory', asyncHandler(async (req, res) => {
     res.sendStatus(404);
   }
 }));
+router.post('/', asyncHandler(async (req, res) => {
+  res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postProfesional(req.body));
+}));
+
 module.exports = router;
