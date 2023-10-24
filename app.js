@@ -13,21 +13,8 @@ const CategoriasService = require('./services/categorias-service');
 const serviciosRoutes = require('./routes/servicios');// si comento este codigo, en el servidor funciona 
 const ServiciosService= require('./services/servicios-service');//si comento este, el srvidor funciona
 const app = express();
-const fileUpload = require('express-fileupload');
 //app.set("port",3000);
-app.use(fileUpload({
-  createParentPath: true, // Crea automáticamente la carpeta si no existe
-  useTempFiles: true, // Utiliza archivos temporales antes de guardar
-  tempFileDir: './uploads', // Directorio temporal para archivos temporales
-  safeFileNames: true, // Evita que se sobrescriban archivos con nombres duplicados
-  preserveExtension: true, // Conserva la extensión del archivo original
-  limits: { fileSize: 10 * 1024 * 1024 }, // Límite de tamaño de archivo (5 MB en este ejemplo)
-  abortOnLimit: true, // Rechaza la solicitud si el límite se supera
-  uploadTimeout: 80000, // Tiempo de espera para la carga (en milisegundos)
-  parseNested: true, // Analiza campos de archivo anidados
-  safeFileNames: true, // Evita que se sobrescriban archivos con nombres duplicados
-  useTempFiles: true, // Utiliza archivos temporales antes de guardar
-}));
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 

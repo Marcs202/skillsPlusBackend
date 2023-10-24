@@ -1,14 +1,11 @@
 const { Router } = require('express');
 const router = Router();
 const asyncHandler = require('express-async-handler');
-const { extname } = require('path');
 const SERVICIOS_SERVICE = 'serviciosService';
-const path = require('path');
+const { extname } = require('path');
 const MIMETYPES = ['image/jpeg', 'image/jpg', 'image/png'];
-const common = require('oci-common');
-const objectStorage = require('oci-objectstorage');
-const fs = require('fs');
-/*const multerUpload = multer({
+const multer = require('multer');
+const multerUpload = multer({
     limits: {
         fieldSize: 10000000,
     },
@@ -24,79 +21,70 @@ const fs = require('fs');
             cb(null, `${fileName}-${Date.now()}${fileExtension}`);
         }
     })
-});*/
-
-/*router.post('/', multerUpload.single('image'), async (req, res) => {
-    res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req, res));
-});*/
-/*
-router.post('/', multerUpload.single('image'), async (req, res) => {
-    // Maneja la subida del archivo al bucket OCI en segundo plano
-    try {
-        const urlImagen = await subirArchivoABucket(req);
-        res.status(201).json({ message: 'Archivo subido con éxito', url: urlImagen });
-    } catch (error) {
-        console.error('Error al subir el archivo al bucket:', error);
-        res.status(500).json({ error: 'Error al subir el archivo' });
-    }
 });
 
+router.post('/', multerUpload.single('image'), async (req, res) => {
+    res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req, res));
+});
+
+
+/*
 async function subirArchivoABucket(req) {
     const objectCommon = new common.ConfigFileAuthenticationDetailsProvider();//esta reconoce el config como esta en la ubicacion por defecto no se ingresa
-        const objectStorageClient = new objectStorage.ObjectStorageClient({ authenticationDetailsProvider: objectCommon });//crea la conexion object cloud
-        const bucketName = 'skillsImages';
-        const objectName = req.file.filename;
-        const filePath = req.file.path;
-        const stream = require('fs').createReadStream(filePath);
-        const putObjectRequest = {
-            namespaceName: 'axjm5wci2rqn',
-            bucketName: bucketName,
-            objectName: objectName,
-            putObjectBody: stream,
-            contentLength: fs.statSync(filePath).size,
-            contentType: req.file.mimetype
-        };
-        const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
-        let connection;
-        try {
-            
-            await objectStorageClient.putObject(putObjectRequest);
-            if (fs.existsSync(filePath)) {
-                fs.unlink(filePath, (err) => {
-                    if (err) {
-                        console.error('Error al eliminar el archivo local:', err);
-                    } else {
-                        console.log('Archivo local eliminado con éxito.');
-                    }
-                });
-            }
-            let titulo = req.body.titulo;
-            let descripcion = req.body.descripcion;
-            let profesionalId = parseInt(req.body.profesionalId, 10);
-            let query = `
+    const objectStorageClient = new objectStorage.ObjectStorageClient({ authenticationDetailsProvider: objectCommon });//crea la conexion object cloud
+    const bucketName = 'skillsImages';
+    const objectName = req.file.filename;
+    const filePath = req.file.path;
+    const stream = require('fs').createReadStream(filePath);
+    const putObjectRequest = {
+        namespaceName: 'axjm5wci2rqn',
+        bucketName: bucketName,
+        objectName: objectName,
+        putObjectBody: stream,
+        contentLength: fs.statSync(filePath).size,
+        contentType: req.file.mimetype
+    };
+    const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
+    let connection;
+    try {
+
+        await objectStorageClient.putObject(putObjectRequest);
+        if (fs.existsSync(filePath)) {
+            fs.unlink(filePath, (err) => {
+                if (err) {
+                    console.error('Error al eliminar el archivo local:', err);
+                } else {
+                    console.log('Archivo local eliminado con éxito.');
+                }
+            });
+        }
+        let titulo = req.body.titulo;
+        let descripcion = req.body.descripcion;
+        let profesionalId = parseInt(req.body.profesionalId, 10);
+        let query = `
             insert into SERVICIOS (TITULO,FOTO,DESCRIPCION,PROFESIONAL_ID)
             VALUES (:titulo,:urlImagen,:descripcion,:idProfesional)
             `;
-            connection = await oracledb.getConnection();
-            const result = await connection.execute(query, [titulo, urlImagen, descripcion, profesionalId],{autoCommit:true});
-            
-            //res.json({ message: 'Archivo subido con éxito', url: urlImagen });
-        } catch (error) {
-            console.error('Error al subir el objeto:', error);
-            //res.status(500).json({ error: 'Error al subir el archivo' });
-        }finally {
-            if (connection) {
-                try {
-                    await connection.close();
-                } catch (err) {
-                    console.error(err);
-                }
+        connection = await oracledb.getConnection();
+        const result = await connection.execute(query, [titulo, urlImagen, descripcion, profesionalId], { autoCommit: true });
+
+        //res.json({ message: 'Archivo subido con éxito', url: urlImagen });
+    } catch (error) {
+        console.error('Error al subir el objeto:', error);
+        //res.status(500).json({ error: 'Error al subir el archivo' });
+    } finally {
+        if (connection) {
+            try {
+                await connection.close();
+            } catch (err) {
+                console.error(err);
             }
         }
-    
+    }
+
     return urlImagen;
 }*/
-
+/*
 router.post('/', async (req, res) => {
     if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send('No se encontraron archivos para cargar.');
@@ -127,7 +115,45 @@ router.post('/', async (req, res) => {
 
         res.send('Archivo cargado con éxito.');
     });
-});
+});*/
+
+// Configuración de OCI
+
+// Configuración de Multer
+
+
+// router.post('/upload', (req, res,next) => {
+//     const upload = multer({ storage: multer.memoryStorage() }).single('image');
+
+//     upload(req, res, async function(err) {
+//         if (err instanceof multer.MulterError) {
+//             // Ocurrió un error de Multer
+//             return res.status(500).json(err);
+//         } else if (err) {
+//             // Ocurrió un error desconocido
+//             return res.status(500).json(err);
+//         }
+
+//         // Crear el objeto PutObjectRequest
+//         const putObjectRequest = {
+//             namespaceName: namespaceName,
+//             bucketName: bucketName,
+//             objectName: req.file.originalname,
+//             putObjectBody: req.file.buffer,
+//             contentLength: req.file.size
+//         };
+
+//         // Subir la imagen al bucket
+//         try {
+//             const response = await client.putObject(putObjectRequest);
+//             res.send('Upload successful');
+//         } catch (error) {
+//             console.error('Error during upload:', error);
+//             res.status(500).send('Upload failed');
+//         }
+//     });
+// });
+
 router.get('/', asyncHandler(async (req, res) => {
     const response = await res.app.get(SERVICIOS_SERVICE).getByIdProfesional(req.query.idProfesional);
     if (response) {

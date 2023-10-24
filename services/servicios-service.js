@@ -1,10 +1,8 @@
 const oracledb = require('oracledb');
 const configuracion = require('../config/config');
 const fs = require('fs');
-const { extname } = require('path');
-const oci = require('oci-sdk');
-// const common = require('oci-common');
-// const objectStorage = require('oci-objectstorage');
+const common = require('oci-common');
+const objectStorage = require('oci-objectstorage');
 module.exports = class ServiciosService {
     constructor() { }
     static async init() {
@@ -28,6 +26,37 @@ module.exports = class ServiciosService {
         return new ServiciosService();
     }
     async postServicio(req, res) {
+        
+        const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
+        let connection;
+        try {
+            
+            
+            let titulo = req.body.titulo;
+            let descripcion = req.body.descripcion;
+            let profesionalId = parseInt(req.body.profesionalId, 10);
+            let query = `
+            insert into SERVICIOS (TITULO,FOTO,DESCRIPCION,PROFESIONAL_ID)
+            VALUES (:titulo,:urlImagen,:descripcion,:idProfesional)
+            `;
+            connection = await oracledb.getConnection();
+            const result = await connection.execute(query, [titulo, urlImagen, descripcion, profesionalId],{autoCommit:true});
+            
+            res.json({ message: 'Archivo subido con éxito', url: urlImagen });
+        } catch (error) {
+            console.error('Error al subir el objeto:', error);
+            res.status(500).json({ error: 'Error al subir el archivo' });
+        }finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
+    /*async postServicio(req, res) {
         const objectCommon = new common.ConfigFileAuthenticationDetailsProvider();//esta reconoce el config como esta en la ubicacion por defecto no se ingresa
         const objectStorageClient = new objectStorage.ObjectStorageClient({ authenticationDetailsProvider: objectCommon });//crea la conexion object cloud
         const bucketName = 'skillsImages';
@@ -79,7 +108,7 @@ module.exports = class ServiciosService {
                 }
             }
         }
-    }
+    }*/
     async getByIdProfesional(profesionalId) {
         let connection;
         const servicios = [];
