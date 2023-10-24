@@ -3,12 +3,12 @@ const router = Router();
 const asyncHandler = require('express-async-handler');
 const { extname } = require('path');
 const SERVICIOS_SERVICE = 'serviciosService';
-const multer = require('multer');
+const path = require('path');
 const MIMETYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const common = require('oci-common');
 const objectStorage = require('oci-objectstorage');
 const fs = require('fs');
-const multerUpload = multer({
+/*const multerUpload = multer({
     limits: {
         fieldSize: 10000000,
     },
@@ -24,12 +24,12 @@ const multerUpload = multer({
             cb(null, `${fileName}-${Date.now()}${fileExtension}`);
         }
     })
-});
+});*/
 
 /*router.post('/', multerUpload.single('image'), async (req, res) => {
     res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req, res));
 });*/
-
+/*
 router.post('/', multerUpload.single('image'), async (req, res) => {
     // Maneja la subida del archivo al bucket OCI en segundo plano
     try {
@@ -95,7 +95,39 @@ async function subirArchivoABucket(req) {
         }
     
     return urlImagen;
-}
+}*/
+
+router.post('/', async (req, res) => {
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No se encontraron archivos para cargar.');
+    }
+
+    const archivoCargado = req.files.image; // 'archivo' debe coincidir con el nombre del campo de entrada en tu formulario HTML
+    if (!archivoCargado) {
+        return res.status(400).send('No se ha cargado ningún archivo.');
+    }
+    // Verifica que el archivo sea de tipo MIME permitido
+    if (!['image/png', 'image/jpg', 'image/jpeg', 'image/webp'].includes(archivoCargado.mimetype)) {
+        return res.status(400).send('Tipo de archivo no permitido.');
+    }
+
+    // Conserva el nombre original del archivo
+    const nombreOriginal = archivoCargado.name;
+
+    // Agrega una marca de tiempo al nombre del archivo (AAAAMMDDHHMMSS)
+    const fechaActual = new Date();
+    const marcaDeTiempo = fechaActual.toISOString().replace(/[-:TZ.]/g, '');
+    const extension = path.extname(nombreOriginal); // Obtén la extensión del archivo original
+    const nombreUnico = `${nombreOriginal}${marcaDeTiempo}${extension}`;
+    // No es necesario especificar la ubicación al mover el archivo
+    archivoCargado.mv(path.join('./uploads', nombreUnico), (err) => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+
+        res.send('Archivo cargado con éxito.');
+    });
+});
 router.get('/', asyncHandler(async (req, res) => {
     const response = await res.app.get(SERVICIOS_SERVICE).getByIdProfesional(req.query.idProfesional);
     if (response) {
