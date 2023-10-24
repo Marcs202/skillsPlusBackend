@@ -3,8 +3,8 @@ const configuracion = require('../config/config');
 const fs = require('fs');
 const { extname } = require('path');
 const oci = require('oci-sdk');
-const common = require('oci-common');
-const objectStorage = require('oci-objectstorage');
+// const common = require('oci-common');
+// const objectStorage = require('oci-objectstorage');
 module.exports = class ServiciosService {
     constructor() { }
     static async init() {
