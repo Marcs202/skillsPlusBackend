@@ -28,7 +28,6 @@ router.post('/', multerUpload.single('image'), async (req, res) => {
     res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req, res));
 });*/
 
-
 /*
 async function subirArchivoABucket(req) {
     const objectCommon = new common.ConfigFileAuthenticationDetailsProvider();//esta reconoce el config como esta en la ubicacion por defecto no se ingresa

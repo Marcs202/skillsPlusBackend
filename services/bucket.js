@@ -22,7 +22,6 @@ async function uploadImage(file,res) {
         //console.log(putObjectRequest);
         const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
         const resultado = await objectStorageClient.putObject(putObjectRequest);
-        res.status(200).json({ resultado: `${resultado}`, pubObject:`${putObjectRequest}` });
         return urlImagen;
     } catch (error) {
         console.error('Error al insertar en el bucket:', error);

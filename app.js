@@ -10,8 +10,10 @@ const profesionalesRoutes = require('./routes/profesionales');
 const ProfesionalesService = require('./services/profesionales-service');
 const categoriasRoutes = require('./routes/categorias');
 const CategoriasService = require('./services/categorias-service');
-const serviciosRoutes = require('./routes/servicios');// si comento este codigo, en el servidor funciona 
-const ServiciosService= require('./services/servicios-service');//si comento este, el srvidor funciona
+const serviciosRoutes = require('./routes/servicios');
+const ServiciosService= require('./services/servicios-service');
+const usuariosRoutes = require('./routes/usuarios');
+const UsuariosServices = require('./services/usuarios-service');
 const app = express();
 const fileUpload = require('express-fileupload');
 //app.set("port",3000);
@@ -39,6 +41,7 @@ app.use('/', homeRoutes);
 app.use('/profesionales',profesionalesRoutes);
 app.use('/categorias',categoriasRoutes);
 app.use('/servicios',serviciosRoutes);//tambien comenté este codigo
+app.use('/usuarios',usuariosRoutes);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
@@ -77,5 +80,11 @@ ServiciosService.init().then((serviciosService)=>{
 });
 process.on('exit', () => {
   app.get('serviciosService').closePool();
+});
+UsuariosServices.init().then((usuariosService)=>{
+  app.set('usuariosService',usuariosService);
+});
+process.on('exit', () => {
+  app.get('usuariosService').closePool();
 });
 module.exports = app;
