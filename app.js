@@ -13,13 +13,18 @@ const CategoriasService = require('./services/categorias-service');
 const serviciosRoutes = require('./routes/servicios');// si comento este codigo, en el servidor funciona 
 const ServiciosService= require('./services/servicios-service');//si comento este, el srvidor funciona
 const app = express();
+const fileUpload = require('express-fileupload');
 //app.set("port",3000);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 
-
+app.use(fileUpload({
+  useTempFiles:true,
+  tempFileDir: path.join(__dirname, 'uploads'),
+  createParentPath: true
+}));
 app.use(cors());
 app.use(morgan('dev'));
 

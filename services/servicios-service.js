@@ -25,7 +25,7 @@ module.exports = class ServiciosService {
         console.log('Pool de conexiones creado.')
         return new ServiciosService();
     }
-    async postServicio(req, res) {
+    /*async postServicio(req, res) {
         
         //const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
         let connection;
@@ -55,8 +55,8 @@ module.exports = class ServiciosService {
                 }
             }
         }
-    }
-    /*async postServicio(req, res) {
+    }*/
+    async postServicio(req, res) {
         const objectCommon = new common.ConfigFileAuthenticationDetailsProvider();//esta reconoce el config como esta en la ubicacion por defecto no se ingresa
         const objectStorageClient = new objectStorage.ObjectStorageClient({ authenticationDetailsProvider: objectCommon });//crea la conexion object cloud
         const bucketName = 'skillsImages';
@@ -108,7 +108,9 @@ module.exports = class ServiciosService {
                 }
             }
         }
-    }*/
+    }
+    async postConExpressUpload(req,res){
+    }
     async getByIdProfesional(profesionalId) {
         let connection;
         const servicios = [];

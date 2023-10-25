@@ -2,12 +2,13 @@ const { Router } = require('express');
 const router = Router();
 const asyncHandler = require('express-async-handler');
 const SERVICIOS_SERVICE = 'serviciosService';
-const { extname } = require('path');
+const { uploadImage } = require('../services/bucket');
+/*const { extname } = require('path');
 const MIMETYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const multer = require('multer');
 const multerUpload = multer({
     limits: {
-        fieldSize: 10000000,
+        fieldSize: 10 * 1024 *1024,
     },
     fileFilter: (req, file, cb) => {
         if (MIMETYPES.includes(file.mimetype)) cb(null, true);
@@ -25,7 +26,7 @@ const multerUpload = multer({
 
 router.post('/', multerUpload.single('image'), async (req, res) => {
     res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postServicio(req, res));
-});
+});*/
 
 
 /*
@@ -153,7 +154,11 @@ router.post('/', async (req, res) => {
 //         }
 //     });
 // });
-
+router.post('/upload', async (req, res) => {
+    //res.status(201).send(await res.app.get(SERVICIOS_SERVICE).postConExpressUpload(req, res));
+    const url= await uploadImage(req.files.image);
+    res.json({ message: `se subio un archivo temp, la url es ${url}` });
+});
 router.get('/', asyncHandler(async (req, res) => {
     const response = await res.app.get(SERVICIOS_SERVICE).getByIdProfesional(req.query.idProfesional);
     if (response) {
