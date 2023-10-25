@@ -18,7 +18,7 @@ const fileUpload = require('express-fileupload');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
+app.timeout = 120000;
 
 app.use(fileUpload({
   useTempFiles:true,
