@@ -40,7 +40,8 @@ module.exports = class UsuariosServices{
                     "Correo":usuario[3],
                     "Contraseña":usuario[4],
                     "Foto":usuario[5],
-                    "Estado":usuario[6]
+                    "Estado":usuario[6],
+                    "Tipo":usuario[7]
                 }
             usuarios.push(schemaUsuarios);
 

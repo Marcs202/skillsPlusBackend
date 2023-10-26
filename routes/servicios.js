@@ -153,12 +153,19 @@ router.post('/', async (req, res) => {
 //         }
 //     });
 // });
-router.post('/upload', async (req, res) => {
+/*router.post('/upload', async (req, res) => {
     try {
         const url = await uploadImage(req.files.image,res);
         res.json({ message: `Se subió un archivo temp, la URL es ${url}` });
     } catch (error) {
         res.status(500).json({ error: 'Error al subir el archivo al bucket' });
+    }
+});*/
+router.post('/upload', async (req, res) => {
+    try {
+        await res.app.get(SERVICIOS_SERVICE).postServicio(req,res,req.files.image);
+    } catch (error) {
+        console.log(error);
     }
 });
 router.get('/', asyncHandler(async (req, res) => {

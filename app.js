@@ -14,6 +14,8 @@ const serviciosRoutes = require('./routes/servicios');
 const ServiciosService= require('./services/servicios-service');
 const usuariosRoutes = require('./routes/usuarios');
 const UsuariosServices = require('./services/usuarios-service');
+const contratacionesRoutes= require('./routes/contrataciones');
+const ContratacionesServices=require('./services/contrataciones-service');
 const app = express();
 const fileUpload = require('express-fileupload');
 //app.set("port",3000);
@@ -42,6 +44,7 @@ app.use('/profesionales',profesionalesRoutes);
 app.use('/categorias',categoriasRoutes);
 app.use('/servicios',serviciosRoutes);//tambien comenté este codigo
 app.use('/usuarios',usuariosRoutes);
+app.use('/contrataciones',contratacionesRoutes);
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
   next(createError(404));
@@ -83,6 +86,12 @@ process.on('exit', () => {
 });
 UsuariosServices.init().then((usuariosService)=>{
   app.set('usuariosService',usuariosService);
+});
+process.on('exit', () => {
+  app.get('usuariosService').closePool();
+});
+ContratacionesServices.init().then((contratacionesService)=>{
+  app.set('contratacionesService',contratacionesService);
 });
 process.on('exit', () => {
   app.get('usuariosService').closePool();
