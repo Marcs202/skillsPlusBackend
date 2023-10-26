@@ -200,7 +200,7 @@ module.exports = class ContratacionesServices{
         }
         return contrataciones;
     }
-    async getByProfesionalRechazado(idProfesional){
+    async getByProfesionalAceptado(idProfesional){
         let connection;
          const contrataciones = [];
         try {
@@ -216,7 +216,7 @@ module.exports = class ContratacionesServices{
             INNER JOIN usuarios uc ON c.cliente_id = uc.id
             INNER JOIN usuarios up ON up.id = (SELECT usuarios_id FROM profesionales WHERE id = c.profesionales_id)
             INNER JOIN servicios s ON c.servicio_id = s.id
-            WHERE c.estado_contrato = 2 AND c.profesionales_id =:idProfesional
+            WHERE c.estado_contrato = 1 AND c.profesionales_id =:idProfesional
             `;
             connection = await oracledb.getConnection();
             let result = await connection.execute(query,[idProfesional], {autoCommit:true});
