@@ -47,7 +47,7 @@ router.get('/proByCategoryDepartament', asyncHandler(async (req, res) => {
   }
 }));
 router.post('/', asyncHandler(async (req, res) => {
-  res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postProfesional(req.body));
+  res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postProfesional(req.body));//recibe JSON
 }));
 router.post('/report', asyncHandler(async (req, res) => {
   res.status(201).send(await res.app.get(PROFESIONALES_SERVICE).postReportProfesional(req.body));
