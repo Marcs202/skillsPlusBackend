@@ -1,6 +1,6 @@
 const oracledb = require('oracledb');
 const configuracion = require('../config/config');
-const { core } = require('oci-sdk');
+const {uploadFile}=require('../services/s3')
 module.exports = class UsuariosServices{
     constructor() {}
     static async init() {
@@ -158,5 +158,33 @@ module.exports = class UsuariosServices{
             throw new Error('Correo o contraseña incorrectos');
         }
     }
-    
+    async crearUsuario(req,res,file){
+        let connection;
+        try {
+            let nombre = req.body.nombre;
+            let apellido = req.body.apellido;
+            let correo = req.body.correo;
+            let pass = req.body.pass;
+            const urlImagen = await  uploadFile(file)
+            let query = `
+                        INSERT INTO usuarios
+                        (nombre,apellido,correo,contraseña,foto) 
+                        VALUES (:nombre,:apellido,:correo,:pass,:url)
+                `;
+            connection = await oracledb.getConnection();
+            const result = await connection.execute(query, [nombre, apellido, correo, pass,urlImagen], { autoCommit: true });
+            res.status(200).json({url:`${urlImagen}`})
+        } catch (error) {
+            console.error('Error al insertar en el bucket:', error);
+            res.status(500).json({ Error: `${error}`});
+            throw error;
+        }finally{
+            try {
+                await connection.close();
+            }
+            catch (error) {
+                console.error(error);
+            }
+        }
+    }
 }

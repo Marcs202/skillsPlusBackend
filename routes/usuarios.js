@@ -24,7 +24,6 @@ router.put('/editar', asyncHandler(async (req, res) => {
   res.status(201).send(await res.app.get(USUARIOS_SERVICE).editarUsuario(req.body));
 
 }));
-
 router.post('/login', asyncHandler(async (req, res) => {
   try {
     const resultado = await res.app.get(USUARIOS_SERVICE).iniciarSesion(req.body);
@@ -33,4 +32,11 @@ router.post('/login', asyncHandler(async (req, res) => {
     res.status(401).send(error.message);
   }
 }));
+router.post('/upload', async (req, res) => {
+  try {
+      await res.app.get(USUARIOS_SERVICE).crearUsuario(req,res,req.files.image);
+  } catch (error) {
+      console.log(error);
+  }
+});
 module.exports = router;

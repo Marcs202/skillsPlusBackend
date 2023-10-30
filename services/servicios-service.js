@@ -1,8 +1,9 @@
 const oracledb = require('oracledb');
 const configuracion = require('../config/config');
 const fs = require('fs');
-const common = require('oci-common');
-const objectStorage = require('oci-objectstorage');
+// const common = require('oci-common');
+// const objectStorage = require('oci-objectstorage');
+const {uploadFile}=require('../services/s3')
 module.exports = class ServiciosService {
     constructor() { }
     static async init() {
@@ -25,38 +26,6 @@ module.exports = class ServiciosService {
         console.log('Pool de conexiones creado.')
         return new ServiciosService();
     }
-    /*async postServicio(req, res) {
-        //solo con insert
-        //const urlImagen = `https://axjm5wci2rqn.objectstorage.mx-queretaro-1.oci.customer-oci.com/n/axjm5wci2rqn/b/skillsImages/o/${objectName}`;
-        let connection;
-        try {
-            
-            
-            let titulo = req.body.titulo;
-            let descripcion = req.body.descripcion;
-            let profesionalId = parseInt(req.body.profesionalId, 10);
-            let query = `
-            insert into SERVICIOS (TITULO,FOTO,DESCRIPCION,PROFESIONAL_ID)
-            VALUES (:titulo,:urlImagen,:descripcion,:idProfesional)
-            `;
-            connection = await oracledb.getConnection();
-            const result = await connection.execute(query, [titulo, urlImagen, descripcion, profesionalId],{autoCommit:true});
-            
-            res.json({ message: 'Archivo subido con éxito', url: urlImagen });
-        } catch (error) {
-            console.error('Error al subir el objeto:', error);
-            res.status(500).json({ error: 'Error al subir el archivo' });
-        }finally {
-            if (connection) {
-                try {
-                    await connection.close();
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-        }
-    }*/
-
     async postServicio(req,res,file){
         const objectCommon = new common.ConfigFileAuthenticationDetailsProvider();//esta reconoce el config como esta en la ubicacion por defecto no se ingresa
         const objectStorageClient = new objectStorage.ObjectStorageClient({ authenticationDetailsProvider: objectCommon });//crea la conexion object cloud
@@ -100,6 +69,34 @@ module.exports = class ServiciosService {
                         console.log('Archivo local eliminado con éxito.');
                     }
                 });
+            }
+        }
+    }
+    async postServicioAWS(req,res,file){
+        
+        let connection;
+        try {
+            let titulo = req.body.titulo;
+            let descripcion = req.body.descripcion;
+            let profesionalId = parseInt(req.body.profesionalId, 10);
+            const urlImagen = await  uploadFile(file)
+            let query = `
+                insert into SERVICIOS (TITULO,FOTO,DESCRIPCION,PROFESIONAL_ID)
+                VALUES (:titulo,:urlImagen,:descripcion,:idProfesional)
+                `;
+            connection = await oracledb.getConnection();
+            const result = await connection.execute(query, [titulo, urlImagen, descripcion, profesionalId], { autoCommit: true });
+            res.status(200).json({url:`${urlImagen}`})
+        } catch (error) {
+            console.error('Error al insertar en el bucket:', error);
+            res.status(500).json({ Error: `${error}`});
+            throw error;
+        }finally{
+            try {
+                await connection.close();
+            }
+            catch (error) {
+                console.error(error);
             }
         }
     }
