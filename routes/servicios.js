@@ -3,6 +3,7 @@ const router = Router();
 const asyncHandler = require('express-async-handler');
 const SERVICIOS_SERVICE = 'serviciosService';
 const { uploadImage } = require('../services/bucket');
+const {uploadFile}=require('../services/s3')
 /*const { extname } = require('path');
 const MIMETYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const multer = require('multer');
@@ -161,6 +162,15 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: 'Error al subir el archivo al bucket' });
     }
 });*/
+router.post('/uplToAWS', async (req, res) => {
+    try {
+        const url = await uploadFile(req.files.image,res);
+        res.json({ message: `Se subió un archivo temp, la URL es ${url}` });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al subir el archivo al bucket' });
+    }
+});
+
 router.post('/upload', async (req, res) => {
     try {
         await res.app.get(SERVICIOS_SERVICE).postServicio(req,res,req.files.image);
@@ -168,6 +178,7 @@ router.post('/upload', async (req, res) => {
         console.log(error);
     }
 });
+
 router.get('/', asyncHandler(async (req, res) => {
     const response = await res.app.get(SERVICIOS_SERVICE).getByIdProfesional(req.query.idProfesional);
     if (response) {
