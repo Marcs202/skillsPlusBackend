@@ -129,13 +129,17 @@ module.exports = class UsuariosServices{
         console.log(correo);
         console.log(pass);
         try {
-            let query= `SELECT id FROM USUARIOS where correo=:correo and contraseña=:pass`;
+            let query= `SELECT usuarios.id AS id_usuario, profesionales.id AS id_profesional
+            FROM usuarios
+            LEFT JOIN profesionales ON usuarios.id = profesionales.usuarios_id
+            WHERE usuarios.correo = :correo AND usuarios.contraseña = :pass`;
             
             connection = await oracledb.getConnection();
             let result = await connection.execute(query,[correo,pass], {autoCommit:true});
             result.rows.map(usuario => {
                 let schemaUsuarios = {
-                    "ID": usuario[0]
+                    "ID_Usuario": usuario[0],
+                    "ID_Profesional":usuario[1]
                 }
             usuarios= schemaUsuarios
     
@@ -153,7 +157,7 @@ module.exports = class UsuariosServices{
         }
         
         if (usuarios) {
-            return { mensaje: 'Inicio de sesión exitoso!', id: usuarios.ID };
+            return { mensaje: 'Inicio de sesión exitoso!', idUsuario: usuarios.ID_Usuario,idProfesional:usuarios.ID_Profesional };
         } else {
             throw new Error('Correo o contraseña incorrectos');
         }

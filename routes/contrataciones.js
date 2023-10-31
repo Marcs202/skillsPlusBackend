@@ -80,4 +80,7 @@ router.put('/rechazar', asyncHandler(async (req, res) => {
 router.put('/finalizar', asyncHandler(async (req, res) => {
     res.status(201).send(await res.app.get(CONTRATACIONES_SERVICE).putFinalizarContrato(req.body));//envia un json
 }));
+router.post('/calificar', asyncHandler(async (req, res) => {
+    res.status(201).send(await res.app.get(CONTRATACIONES_SERVICE).postCalificarContrato(req.body));//recibe JSON
+  }));
 module.exports = router;

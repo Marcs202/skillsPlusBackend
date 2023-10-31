@@ -77,6 +77,7 @@ module.exports = class ContratacionesServices{
             uc.apellido AS apellido_usuario,
             up.nombre AS nombre_profesional,
             up.apellido AS apellido_profesional,
+            c.profesionales_ID as idProfesional,
             s.titulo AS servicio_contratado
             FROM contratacion c
             INNER JOIN usuarios uc ON c.cliente_id = uc.id
@@ -84,6 +85,7 @@ module.exports = class ContratacionesServices{
             INNER JOIN servicios s ON c.servicio_id = s.id
             WHERE c.estado_contrato = 1 AND uc.id =:idCliente
             `;
+            //El profesional NOMBRE APELLIDO ha aceptado prestar su servicio de SERVICIO
             connection = await oracledb.getConnection();
             let result = await connection.execute(query,[idCliente], {autoCommit:true});
             result.rows.map(contratacion => {
@@ -93,7 +95,8 @@ module.exports = class ContratacionesServices{
                     "Apellido_Cliente": contratacion[2],
                     "Nombre_profesional":contratacion[3],
                     "Apellido_Profesional":contratacion[4],
-                    "Servicio contratado":contratacion[5]
+                    "ID_ProfesionalContratado":contratacion[5],
+                    "Servicio contratado":contratacion[6]
                 }
             contrataciones.push(schemaContrataciones);
 
@@ -420,5 +423,31 @@ module.exports = class ContratacionesServices{
         //     throw new Error('Correo o contraseña incorrectos');
         // }
     }
-    
+    async postCalificarContrato(contrato) {
+        //profesional es el json que se recibe del metodo post 
+        let contratoID = contrato.idContrato;//obtiene el id del contrato capturado por json, la clave es idUsuario
+        let calificacion = contrato.calificacion;
+
+        let connection;
+        try {
+            let query = `
+            BEGIN actualizar_calificacion(:idContrato,:Calificacion);
+            END;`;
+            // Obtén la conexión a la base de datos
+            connection = await oracledb.getConnection();
+            // Ejecuta el procedimiento almacenado
+            const result = await connection.execute(query, { idContrato: contratoID, Calificacion: calificacion });
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            if (connection) {
+                try {
+                    await connection.close();
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    }
 }
